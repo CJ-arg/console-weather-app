@@ -26,7 +26,7 @@ class Busquedas {
   async climaLugar(lat, lng) {
     try {
       const resp = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=44.34&lon=10.99&appid=a20fe4abe187a8a07841045cfbf18d9c&units=metric&lang=es`
+        `https://api.openweathermap.org/data/2.5/weather?lat=44.34&lon=10.99&appid=${OPENWEATHER_KEY}&units=metric&lang=es`
       );
       console.log(resp.data.weather);
       return resp.data.weather.main.map((clima) => ({
