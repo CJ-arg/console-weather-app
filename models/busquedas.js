@@ -1,6 +1,6 @@
 const fs = require("fs");
+
 const axios = require("axios");
-require("colors");
 
 class Busquedas {
   historial = [];
@@ -34,8 +34,8 @@ class Busquedas {
       lang: "es",
     };
   }
-  async ciudad(place = " ") {
-    //peticion http
+
+  async ciudad(lugar = "") {
     try {
       // Petición http
       const intance = axios.create({
@@ -54,29 +54,56 @@ class Busquedas {
       return [];
     }
   }
-  async climaLugar(lat, lng) {
+
+  async climaLugar(lat, lon) {
     try {
-      const resp = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=44.34&lon=10.99&appid=${OPENWEATHER_KEY}&units=metric&lang=es`
-      );
-      console.log(resp.data.weather);
-      return resp.data.weather.main.map((clima) => ({
-        id: clima.id,
-        description: clima.description,
-        min: clima.min,
-        max: clima.max,
-        temp: clima.temp,
-      }));
+      const instance = axios.create({
+        baseURL: `https://api.openweathermap.org/data/2.5/weather`,
+        params: { ...this.paramsWeather, lat, lon },
+      });
+
+      const resp = await instance.get();
+      const { weather, main } = resp.data;
+
+      return {
+        desc: weather[0].description,
+        min: main.temp_min,
+        max: main.temp_max,
+        temp: main.temp,
+      };
     } catch (error) {
-      return;
+      console.log(error);
     }
   }
+
   agregarHistorial(lugar = "") {
-    this.historial.unshift(lugar);
+    if (this.historial.includes(lugar.toLocaleLowerCase())) {
+      return;
+    }
+    this.historial = this.historial.splice(0, 5);
+
+    this.historial.unshift(lugar.toLocaleLowerCase());
+
+    // Grabar en DB
+    this.guardarDB();
+  }
+
+  guardarDB() {
+    const payload = {
+      historial: this.historial,
+    };
+
+    fs.writeFileSync(this.dbPath, JSON.stringify(payload));
+  }
+
+  leerDB() {
+    if (!fs.existsSync(this.dbPath)) return;
+
+    const info = fs.readFileSync(this.dbPath, { encoding: "utf-8" });
+    const data = JSON.parse(info);
+
+    this.historial = data.historial;
   }
 }
+
 module.exports = Busquedas;
-
-// https://www.mapbox.com/
-
-// https://docs.mapbox.com/api/search/geocoding/
