@@ -1,24 +1,55 @@
+const fs = require("fs");
 const axios = require("axios");
 require("colors");
+
 class Busquedas {
-  historial = ["Lima", "Quito"];
+  historial = [];
+  dbPath = "./db/database.json";
+
   constructor() {
-    //leer DB
+    this.leerDB();
+  }
+
+  get historialCapitalizado() {
+    return this.historial.map((lugar) => {
+      let palabras = lugar.split(" ");
+      palabras = palabras.map((p) => p[0].toUpperCase() + p.substring(1));
+
+      return palabras.join(" ");
+    });
+  }
+
+  get paramsMapbox() {
+    return {
+      access_token: process.env.MAPBOX_KEY,
+      limit: 5,
+      language: "es",
+    };
+  }
+
+  get paramsWeather() {
+    return {
+      appid: process.env.OPENWEATHER_KEY,
+      units: "metric",
+      lang: "es",
+    };
   }
   async ciudad(place = " ") {
     //peticion http
     try {
-      const resp = await axios.get(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${place}.json?proximity=ip&language=es&access_token=pk.eyJ1IjoicGVkcnBncmVlbmRlciIsImEiOiJjbGZ6ZXNnZ2Ywa2wyM2htc283dDRmOHE1In0.F7VOKPYUuCwmDxfnjDs33A`
-      );
-      //Peticion HTTP
+      // Petición http
+      const intance = axios.create({
+        baseURL: `https://api.mapbox.com/geocoding/v5/mapbox.places/${lugar}.json`,
+        params: this.paramsMapbox,
+      });
 
+      const resp = await intance.get();
       return resp.data.features.map((lugar) => ({
         id: lugar.id,
         nombre: lugar.place_name,
         lng: lugar.center[0],
         lat: lugar.center[1],
-      })); //ciudades que coincidan
+      }));
     } catch (error) {
       return [];
     }
