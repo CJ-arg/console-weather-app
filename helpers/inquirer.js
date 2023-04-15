@@ -9,16 +9,16 @@ const preguntas = [
     choices: [
       {
         value: 1,
-        name: "1* Buscar Ciudad",
+        name: `${"1.".green} Buscar ciudad`,
       },
       {
         value: 2,
-        name: "2* Historial",
+        name: `${"2.".green} Historial`,
       },
 
       {
         value: 0,
-        name: "0* Salir",
+        name: `${"0.".red} Salir`,
       },
     ],
   },
@@ -43,7 +43,7 @@ const pausa = async () => {
       message: `Presione ${"ENTER".green} para continuar`,
     },
   ];
-  // console.log("\n");
+
   console.log("\n");
   const { enter } = await inquirer.prompt(question);
   return enter;
